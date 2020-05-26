@@ -1,0 +1,17 @@
+#!/bin/bash
+
+CURRENT_DIR=$(pwd)
+ROOT_DIR="$( dirname "${BASH_SOURCE[0]}" )"/..
+PIPELINE=$1
+
+cd $ROOT_DIR
+
+[ -z "$PIPELINE" ] && { echo "pipeline missing in argument"; exit; }
+[ ! -f "$PIPELINE" ] && { echo "pipeline config not found"; exit; }
+
+echo "Creating pipeline $PIPELINE"
+curl -X POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
+  -H "Authorization: Bearer $BUILDKITE_TOKEN" \
+  -d @$PIPELINE
+
+cd $CURRENT_DIR
