@@ -6,7 +6,7 @@
     {
       "type": "script",
       "name": ":buildkite: Pull Request",
-      "command": "bulidkite-agent pipeline upload .buildkite/pull-request.yml"
+      "command": "buildkite-agent pipeline upload .buildkite/pull-request.yml"
     }
   ],
   "description": "Pipeline for all pull requests",
