@@ -1,0 +1,3 @@
+steps:
+  - label: "Running PR build"
+    command: "echo hello world"
