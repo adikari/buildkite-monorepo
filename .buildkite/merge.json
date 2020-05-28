@@ -1,0 +1,22 @@
+{
+  "name": "merge",
+  "repository": "git@github.com:adikari/buildkite-docker-example.git",
+  "default_branch": "master",
+  "steps": [
+    {
+      "type": "script",
+      "name": ":buildkite: Merge",
+      "command": "buildkite-agent pipeline upload .buildkite/merge.yml"
+    }
+  ],
+  "description": "Pipeline for all merges",
+  "cancel_running_branch_builds": false,
+  "skip_queued_branch_builds": false,
+  "branch_configuration": "master",
+  "provider_settings": {
+    "trigger_mode": "code",
+    "build_pull_request": false,
+    "publish_commit_status_per_step": true,
+    "publish_blocked_as_pending": false
+  }
+}
