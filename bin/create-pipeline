@@ -17,6 +17,6 @@ RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pi
 echo $RESPONSE | jq .
 echo "Pipeline create complete."
 
-echo "Webhook Url: $(echo "$RESPONSE" | jq -r '.provider.webhook_url')"
+echo "\n Webhook Url: $(echo "$RESPONSE" | jq -r '.provider.webhook_url')"
 
 cd $CURRENT_DIR
