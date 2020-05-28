@@ -1,9 +1,8 @@
-name: Trigger Buildkite Pull Request Pipeline
+name: Trigger Pull Request Pipeline
 on: [push]
 
 jobs:
   build:
-    name: Trigger Buildkite Pull Request
     runs-on: ubuntu-latest
     steps:
       - name: Buildkite
