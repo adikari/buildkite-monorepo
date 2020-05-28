@@ -1,0 +1,13 @@
+name: Trigger Buildkite Pull Request Pipeline
+on: [push]
+
+jobs:
+  build:
+    name: Trigger Buildkite Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Buildkite
+        uses: buildkite/trigger-pipeline-action@v1.2.0
+        env:
+          PIPELINE: "adikari/pull-request"
+          MESSAGE: ":github: Triggered from a GitHub Action"
