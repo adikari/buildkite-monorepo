@@ -10,8 +10,13 @@ cd $ROOT_DIR
 [ ! -f "$PIPELINE" ] && { echo "pipeline config not found"; exit; }
 
 echo "Creating pipeline $PIPELINE"
-curl -X POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
+RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
   -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  -d @$PIPELINE
+  -d @$PIPELINE)
+
+echo $RESPONSE | jq .
+echo "Pipeline create complete."
+
+echo "Webhook Url: $(echo "$RESPONSE" | jq -r '.provider.webhook_url')"
 
 cd $CURRENT_DIR
