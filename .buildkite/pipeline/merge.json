@@ -15,7 +15,7 @@
   "branch_configuration": "master",
   "provider_settings": {
     "trigger_mode": "code",
-    "build_pull_request": false,
+    "build_pull_requests": false,
     "publish_commit_status_per_step": true,
     "publish_blocked_as_pending": false
   }
