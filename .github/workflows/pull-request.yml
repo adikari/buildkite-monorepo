@@ -3,9 +3,10 @@ on: [push]
 
 jobs:
   build:
+    name: Pull request pipeline
     runs-on: ubuntu-latest
     steps:
-      - name: Pull request pipeline
+      - name: trigger
         uses: buildkite/trigger-pipeline-action@v1.2.0
         env:
           PIPELINE: adikari/pull-request
