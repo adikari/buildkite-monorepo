@@ -2,6 +2,8 @@ name: Trigger Buildkite PR
 on:
   push:
     branches:
+      - '*'
+      - '*/*'
       - "!master"
 
 jobs:
