@@ -6,9 +6,9 @@ jobs:
     name: Pull request pipeline
     runs-on: ubuntu-latest
     steps:
-      - name: trigger
+      - name: Trigger pipeline
         uses: buildkite/trigger-pipeline-action@v1.2.0
         env:
           PIPELINE: adikari/pull-request
-          MESSAGE: ":github: Triggered from a GitHub Action"
+          MESSAGE: ":github: ${{github.event.head_commit.message}}"
           BUILDKITE_API_ACCESS_TOKEN: ${{ secrets.BUILDKITE_API_ACCESS_TOKEN }}
