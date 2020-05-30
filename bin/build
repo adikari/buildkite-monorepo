@@ -4,4 +4,4 @@ echo "building application.."
 
 sleep 5
 
-echo "application is ready."
+echo "build complete"
