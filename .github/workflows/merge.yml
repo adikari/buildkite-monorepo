@@ -1,17 +1,18 @@
-name: Trigger Buildkite PR
+name: Trigger Buildkite Merge
 on:
   push:
     branches:
-      - "!master"
+      - "master"
 
 jobs:
   build:
-    name: Pull request pipeline
+    name: Merge pipeline
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == "true"
     steps:
       - name: Trigger pipeline
         uses: buildkite/trigger-pipeline-action@v1.2.0
         env:
-          PIPELINE: adikari/pull-request
-          MESSAGE: ":github: ${{github.event.head_commit.message}}"
+          PIPELINE: adikari/merge
+          MESSAGE: ":github: ${{github.event.pull_request.message}}"
           BUILDKITE_API_ACCESS_TOKEN: ${{ secrets.BUILDKITE_API_ACCESS_TOKEN }}
