@@ -1,0 +1,3 @@
+steps:
+  - label: "foo service pull request"
+    command: "./bin/build"
