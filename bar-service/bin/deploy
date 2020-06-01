@@ -1,6 +1,6 @@
 #!/bin/bash
 
-***REMOVED***uo pipefail
+set -euo pipefail
 
 echo "Deploying bar service"
 
