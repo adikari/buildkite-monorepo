@@ -16,7 +16,7 @@ cd $ROOT_DIR
 [ -z "$SERVICE" ] && { echo "service is missing in argument!"; exit; }
 
 COMMON_CONFIG='{
-  "name": "'$SERVICE' '$TYPE'",
+  "name": "'$SERVICE'-'$TYPE'",
   "repository": "git@github.com:adikari/buildkite-docker-example.git",
   "steps": [
     {
