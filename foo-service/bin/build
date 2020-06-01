@@ -2,4 +2,4 @@
 
 ***REMOVED***uo pipefail
 
-echo "Building foo service"
+echo "Building foo services"
