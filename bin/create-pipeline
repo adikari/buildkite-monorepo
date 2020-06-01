@@ -52,7 +52,9 @@ DEPLOY_CONFIG='{
   "branch_configuration": "master",
   "description": "Pipeline for '$SERVICE' deployment",
   "provider_settings": {
-    "trigger_mode": "none"
+    trigger_mode": "github",
+    "publish_blocked_as_pending": true,
+    "separate_pull_request_statuses": true
   }
 }'
 
@@ -61,7 +63,9 @@ MERGE_CONFIG='{
   "branch_configuration": "master",
   "description": "Pipeline for '$SERVICE' merge",
   "provider_settings": {
-    "trigger_mode": "none"
+    "trigger_mode": "github",
+    "publish_blocked_as_pending": true,
+    "separate_pull_request_statuses": true
   }
 }'
 
