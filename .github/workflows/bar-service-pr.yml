@@ -2,7 +2,7 @@ name: Trigger Buildkite PR
 on:
   push:
     paths:
-      - "bar-service/*"
+      - "bar-service/**"
     branches:
       - "*"
       - "*/*"

@@ -2,7 +2,7 @@ name: Trigger Buildkite Merge
 on:
   push:
     paths:
-      - "foo-service/*"
+      - "foo-service/**"
     branches:
       - "master"
 
