@@ -1,5 +1,5 @@
 #!/bin/bash
 
-***REMOVED***uo pipefail
+set -euo pipefail
 
 echo "Running tests for foo service"

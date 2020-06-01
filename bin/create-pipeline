@@ -90,37 +90,13 @@ echo "Creating pipeline $TYPE.."
 PIPELINE_CONFIG=$((echo $COMMON_CONFIG; echo $CURRENT_PIPELINE_CONFIG) | jq -s add)
 
 ### Create pipeline ###
-PIPELINE_RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
+RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
   -H "Authorization: Bearer $BUILDKITE_TOKEN" \
   -d "$PIPELINE_CONFIG"
 )
 
 # ### Check for pipeline create error ###
-[[ "$PIPELINE_RESPONSE" == *errors* ]] && { echo $PIPELINE_RESPONSE | jq; exit 1; }
-
-# echo "Adding pipeline webhook in github.."
-
-# ### Get webhook url from pipeline create response ###
-# WEBHOOK=$(echo $PIPELINE_RESPONSE | jq -r ".provider.webhook_url")
-
-# ### Create github webhook for the pipeline ###
-# WEBHOOK_RESPONSE=$(curl -s -o /dev/null POST "https://api.github.com/repos/adikari/buildkite-docker-example/hooks" \
-#   -H "Authorization: TOKEN $GITHUB_TOKEN" \
-#   -d '{
-#     "name": "web",
-#     "active": true,
-#     "events": [
-#       "push"
-#     ],
-#     "config": {
-#       "url": "'$WEBHOOK'",
-#       "content_type": "json"
-#     }
-#   }'
-# )
-
-# ### Check for webhook create error ###
-# [[ "$WEBHOOK_RESPONSE" == *errors* ]] && { echo $WEBHOOK_RESPONSE | jq; exit 1; }
+[[ "$RESPONSE" == *errors* ]] && { echo $RESPONSE | jq; exit 1; }
 
 echo "done."
 
