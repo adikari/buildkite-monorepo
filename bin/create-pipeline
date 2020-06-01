@@ -30,27 +30,39 @@ COMMON_CONFIG='{
     }
   ],
   "cancel_running_branch_builds": true,
-  "skip_queued_branch_builds": true,
-  "provider_settings": {
-    "trigger_mode": "none"
-  }
+  "skip_queued_branch_builds": true
 }'
 
 PULL_REQUEST_CONFIG='{
   "default_branch": "",
   "description": "Pipeline for '$SERVICE' pull requests",
-  "branch_configuration": "!master"
+  "branch_configuration": "!master",
+  "provider_settings": {
+    "trigger_mode": "code",
+    "publish_commit_status_per_step": true,
+    "publish_blocked_as_pending": true,
+    "pull_request_branch_filter_enabled": true,
+    "pull_request_branch_filter_configuration": "!master",
+    "separate_pull_request_statuses": true
+  }
 }'
 
 DEPLOY_CONFIG='{
   "default_branch": "master",
-  "description": "Pipeline for '$SERVICE' deployment"
+  "branch_configuration": "master",
+  "description": "Pipeline for '$SERVICE' deployment",
+  "provider_settings": {
+    "trigger_mode": "none"
+  }
 }'
 
 MERGE_CONFIG='{
   "default_branch": "master",
   "branch_configuration": "master",
-  "description": "Pipeline for '$SERVICE' merge"
+  "description": "Pipeline for '$SERVICE' merge",
+  "provider_settings": {
+    "trigger_mode": "none"
+  }
 }'
 
 ### Check which pipeline to create ###
@@ -77,32 +89,32 @@ PIPELINE_RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$OR
   -d "$PIPELINE_CONFIG"
 )
 
-### Check for pipeline create error ###
+# ### Check for pipeline create error ###
 [[ "$PIPELINE_RESPONSE" == *errors* ]] && { echo $PIPELINE_RESPONSE | jq; exit 1; }
 
-echo "Adding pipeline webhook in github.."
+# echo "Adding pipeline webhook in github.."
 
-### Get webhook url from pipeline create response ###
-WEBHOOK=$(echo $PIPELINE_RESPONSE | jq -r ".provider.webhook_url")
+# ### Get webhook url from pipeline create response ###
+# WEBHOOK=$(echo $PIPELINE_RESPONSE | jq -r ".provider.webhook_url")
 
-### Create github webhook for the pipeline ###
-WEBHOOK_RESPONSE=$(curl -s -o /dev/null POST "https://api.github.com/repos/adikari/buildkite-docker-example/hooks" \
-  -H "Authorization: TOKEN $GITHUB_TOKEN" \
-  -d '{
-    "name": "web",
-    "active": true,
-    "events": [
-      "push"
-    ],
-    "config": {
-      "url": "'$WEBHOOK'",
-      "content_type": "json"
-    }
-  }'
-)
+# ### Create github webhook for the pipeline ###
+# WEBHOOK_RESPONSE=$(curl -s -o /dev/null POST "https://api.github.com/repos/adikari/buildkite-docker-example/hooks" \
+#   -H "Authorization: TOKEN $GITHUB_TOKEN" \
+#   -d '{
+#     "name": "web",
+#     "active": true,
+#     "events": [
+#       "push"
+#     ],
+#     "config": {
+#       "url": "'$WEBHOOK'",
+#       "content_type": "json"
+#     }
+#   }'
+# )
 
-### Check for webhook create error ###
-[[ "$WEBHOOK_RESPONSE" == *errors* ]] && { echo $WEBHOOK_RESPONSE | jq; exit 1; }
+# ### Check for webhook create error ###
+# [[ "$WEBHOOK_RESPONSE" == *errors* ]] && { echo $WEBHOOK_RESPONSE | jq; exit 1; }
 
 echo "done."
 
