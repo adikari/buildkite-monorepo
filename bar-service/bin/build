@@ -1,0 +1,5 @@
+#!/bin/bash
+
+***REMOVED***uo pipefail
+
+echo "Building bar service"
