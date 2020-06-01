@@ -2,9 +2,11 @@
 
 set -u
 
+### Validate number of arguments ###
 USAGE="ERROR: Invalid arguments. \nUsage: create-pipeline <pipeline-type> <service-name>";
 [ $# -lt 2 ] && (echo -e $USAGE; exit 1;)
 
+### Define variables ###
 CURRENT_DIR=$(pwd)
 ROOT_DIR="$( dirname "${BASH_SOURCE[0]}" )"/..
 TYPE=$1
@@ -12,9 +14,11 @@ SERVICE=$2
 
 cd $ROOT_DIR
 
+### Validate script arguments ###
 [ -z "$TYPE" ] && { echo "pipeline type is missing in argument!"; exit; }
 [ -z "$SERVICE" ] && { echo "service is missing in argument!"; exit; }
 
+### Define buildkite pipeline payload ###
 COMMON_CONFIG='{
   "name": "'$SERVICE'-'$TYPE'",
   "repository": "git@github.com:adikari/buildkite-docker-example.git",
@@ -49,27 +53,57 @@ MERGE_CONFIG='{
   "description": "Pipeline for '$SERVICE' merge"
 }'
 
-PIPELINE_CONFIG=''
+### Check which pipeline to create ###
+CURRENT_PIPELINE_CONFIG=''
 case $TYPE in
   pull-request)
-      PIPELINE_CONFIG=$PULL_REQUEST_CONFIG;;
+    CURRENT_PIPELINE_CONFIG=$PULL_REQUEST_CONFIG;;
   merge)
-    PIPELINE_CONFIG=$MERGE_CONFIG;;
+    CURRENT_PIPELINE_CONFIG=$MERGE_CONFIG;;
   deploy)
-    PIPELINE_CONFIG=$DEPLOY_CONFIG;;
+    CURRENT_PIPELINE_CONFIG=$DEPLOY_CONFIG;;
   *)
     echo "Invalid pipeline type. Allowed values <pull-request|merge|deploy>"; exit 1;;
 esac
 
-echo "Creating pipeline $TYPE"
+echo "Creating pipeline $TYPE.."
 
-RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
+### Combine common payload and current pipeline payload ###
+PIPELINE_CONFIG=$((echo $COMMON_CONFIG; echo $CURRENT_PIPELINE_CONFIG) | jq -s add)
+
+### Create pipeline ###
+PIPELINE_RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
   -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  -d "$((echo $COMMON_CONFIG; echo $PIPELINE_CONFIG) | jq -s add)"
+  -d "$PIPELINE_CONFIG"
 )
 
-echo $RESPONSE | jq
+### Check for pipeline create error ###
+[[ "$PIPELINE_RESPONSE" == *errors* ]] && { echo $PIPELINE_RESPONSE | jq; exit 1; }
 
-echo "Pipeline create complete."
+echo "Adding pipeline webhook in github.."
+
+### Get webhook url from pipeline create response ###
+WEBHOOK=$(echo $PIPELINE_RESPONSE | jq -r ".provider.webhook_url")
+
+### Create github webhook for the pipeline ###
+WEBHOOK_RESPONSE=$(curl -s -o /dev/null POST "https://api.github.com/repos/adikari/buildkite-docker-example/hooks" \
+  -H "Authorization: TOKEN $GITHUB_TOKEN" \
+  -d '{
+    "name": "web",
+    "active": true,
+    "events": [
+      "push"
+    ],
+    "config": {
+      "url": "'$WEBHOOK'",
+      "content_type": "json"
+    }
+  }'
+)
+
+### Check for webhook create error ###
+[[ "$WEBHOOK_RESPONSE" == *errors* ]] && { echo $WEBHOOK_RESPONSE | jq; exit 1; }
+
+echo "done."
 
 cd $CURRENT_DIR
