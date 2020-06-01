@@ -2,7 +2,7 @@ name: Trigger Buildkite PR
 on:
   push:
     paths:
-      - "foo-service/*"
+      - "bar-service/*"
     branches:
       - "*"
       - "*/*"
@@ -10,13 +10,13 @@ on:
 
 jobs:
   build:
-    name: Pull request pipeline
+    name: Bar Service Pull request
     runs-on: ubuntu-latest
     env:
       BUILDKITE_API_ACCESS_TOKEN: ${{ secrets.BUILDKITE_API_ACCESS_TOKEN }}
       MESSAGE: ":github: ${{github.event.head_commit.message}}"
     steps:
-      - name: Foo service pull request
+      - name: Bar service pull request
         uses: buildkite/trigger-pipeline-action@v1.2.0
         env:
-          PIPELINE: adikari/foo-service-pull-request
+          PIPELINE: adikari/bar-service-pull-request
