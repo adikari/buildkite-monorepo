@@ -4,4 +4,4 @@
 
 echo "Deploying foo service"
 
-echo "Deployment complete"
+echo "Deployment completed"
