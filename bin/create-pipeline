@@ -49,27 +49,30 @@ MERGE_CONFIG='{
   "description": "Pipeline for '$SERVICE' merge"
 }'
 
-PIPELINE_CONFIG=''
+CURRENT_PIPELINE_CONFIG=''
 case $TYPE in
   pull-request)
-      PIPELINE_CONFIG=$PULL_REQUEST_CONFIG;;
+    CURRENT_PIPELINE_CONFIG=$PULL_REQUEST_CONFIG;;
   merge)
-    PIPELINE_CONFIG=$MERGE_CONFIG;;
+    CURRENT_PIPELINE_CONFIG=$MERGE_CONFIG;;
   deploy)
-    PIPELINE_CONFIG=$DEPLOY_CONFIG;;
+    CURRENT_PIPELINE_CONFIG=$DEPLOY_CONFIG;;
   *)
     echo "Invalid pipeline type. Allowed values <pull-request|merge|deploy>"; exit 1;;
 esac
 
 echo "Creating pipeline $TYPE"
 
+PIPELINE_CONFIG=$((echo $COMMON_CONFIG; echo $CURRENT_PIPELINE_CONFIG) | jq -s add)
+
 RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
   -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  -d "$((echo $COMMON_CONFIG; echo $PIPELINE_CONFIG) | jq -s add)"
+  -d "$PIPELINE_CONFIG"
 )
 
-echo $RESPONSE | jq
+echo "adding pipeline webhook in github.."
+WEBHOOK=$(echo $RESPONSE | jq -r ".provider.webhook_url")
 
-echo "Pipeline create complete."
+echo $WEBHOOK
 
 cd $CURRENT_DIR
