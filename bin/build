@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo "building application.."
-
-sleep 5
-
-echo "build complete"
