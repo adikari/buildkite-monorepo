@@ -1,20 +1,75 @@
 #!/bin/bash
 
+set -u
+
+USAGE="ERROR: Invalid arguments. \nUsage: create-pipeline <pipeline-type> <service-name>";
+[ $# -lt 2 ] && (echo -e $USAGE; exit 1;)
+
 CURRENT_DIR=$(pwd)
 ROOT_DIR="$( dirname "${BASH_SOURCE[0]}" )"/..
-PIPELINE=$1
+TYPE=$1
+SERVICE=$2
 
 cd $ROOT_DIR
 
-[ -z "$PIPELINE" ] && { echo "pipeline missing in argument"; exit; }
-[ ! -f "$PIPELINE" ] && { echo "pipeline config not found"; exit; }
+[ -z "$TYPE" ] && { echo "pipeline type is missing in argument!"; exit; }
+[ -z "$SERVICE" ] && { echo "service is missing in argument!"; exit; }
 
-echo "Creating pipeline $PIPELINE"
+COMMON_CONFIG='{
+  "name": "'$SERVICE'-'$TYPE'",
+  "repository": "git@github.com:adikari/buildkite-docker-example.git",
+  "steps": [
+    {
+      "type": "script",
+      "name": ":buildkite: '$TYPE'",
+      "command": "buildkite-agent pipeline upload '$SERVICE'/.buildkite/'$TYPE'.yml"
+    }
+  ],
+  "cancel_running_branch_builds": true,
+  "skip_queued_branch_builds": true,
+  "provider_settings": {
+    "trigger_mode": "none"
+  }
+}'
+
+PULL_REQUEST_CONFIG='{
+  "default_branch": "",
+  "description": "Pipeline for '$SERVICE' pull requests",
+  "branch_configuration": "!master"
+}'
+
+DEPLOY_CONFIG='{
+  "default_branch": "master",
+  "description": "Pipeline for '$SERVICE' deployment"
+}'
+
+MERGE_CONFIG='{
+  "default_branch": "master",
+  "branch_configuration": "master",
+  "description": "Pipeline for '$SERVICE' merge"
+}'
+
+PIPELINE_CONFIG=''
+case $TYPE in
+  pull-request)
+      PIPELINE_CONFIG=$PULL_REQUEST_CONFIG;;
+  merge)
+    PIPELINE_CONFIG=$MERGE_CONFIG;;
+  deploy)
+    PIPELINE_CONFIG=$DEPLOY_CONFIG;;
+  *)
+    echo "Invalid pipeline type. Allowed values <pull-request|merge|deploy>"; exit 1;;
+esac
+
+echo "Creating pipeline $TYPE"
+
 RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
   -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  -d @$PIPELINE)
+  -d "$((echo $COMMON_CONFIG; echo $PIPELINE_CONFIG) | jq -s add)"
+)
 
-echo $RESPONSE | jq .
+echo $RESPONSE | jq
+
 echo "Pipeline create complete."
 
 cd $CURRENT_DIR
