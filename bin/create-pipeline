@@ -95,7 +95,7 @@ RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pi
   -d "$PIPELINE_CONFIG"
 )
 
-# ### Check for pipeline create error ###
+# ### Check for pipeline create errors ###
 [[ "$RESPONSE" == *errors* ]] && { echo $RESPONSE | jq; exit 1; }
 
 echo "done."
