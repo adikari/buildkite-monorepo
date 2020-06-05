@@ -15,7 +15,7 @@ USAGE="USAGE: $(basename "$0") [-s|--service] service_name [-t|--type] pipeline_
 
 Eg: create-pipeline --type pull-request
     create-pipeline --type merge --service foo-service
-    create-pipeline --type merge --status-check
+    create-pipeline --type merge --status-checks
 
 NOTE: BUILDKITE_TOKEN must be set in environment
 
@@ -23,7 +23,7 @@ ARGUMENTS:
     -t | --type           buildkite pipeline type <merge|pull-request|deploy> (required)
     -s | --service        service name (optional, default: deploy root pipeline)
     -r | --repository     github repository url (optional, default: buildkite-docker-example)
-    -c | --status-check   enable github status checks (optional, default: false)
+    -c | --status-checks      enable github status checks (optional, default: true)
     -h | --help           show this help text"
 
 [ -z $BUILDKITE_TOKEN ] && { echo "BUILDKITE_TOKEN is not set."; exit 1;}
@@ -45,23 +45,27 @@ done
 
 export PIPELINE_NAME=$([ $SERVICE == "." ] && echo "" || echo "$SERVICE-")$PIPELINE_TYPE
 
-BUILDKITE_CONFIG=.buildkite/pipelines/$PIPELINE_TYPE.json
-[ ! -f "$BUILDKITE_CONFIG" ] && { echo "Invalid pipelintype: File not found $BUILDKITE_CONFIG"; exit; }
+BUILDKITE_CONFIG_FILE=.buildkite/pipelines/$PIPELINE_TYPE.json
+[ ! -f "$BUILDKITE_CONFIG_FILE" ] && { echo "Invalid pipeline type: File not found $BUILDKITE_CONFIG_FILE"; exit; }
+
+BUILDKITE_CONFIG=$(cat $BUILDKITE_CONFIG_FILE | envsubst)
+
+if [ $STATUS_CHECK == "false" ]; then
+  pipeline_settings='{ "provider_settings": { "trigger_mode": "none" } }'
+  BUILDKITE_CONFIG=$((echo $BUILDKITE_CONFIG; echo $pipeline_settings) | jq -s add)
+fi
 
 cd $ROOT_DIR
 
-cat $BUILDKITE_CONFIG | envsubst | jq
+echo "Creating $PIPELINE_TYPE pipeline.."
+RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$BUILDKITE_ORG_SLUG/pipelines" \
+  -H "Authorization: Bearer $BUILDKITE_TOKEN" \
+  -d "$BUILDKITE_CONFIG"
+)
 
-# ### Create pipeline ###
-# RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$BUILDKITE_ORG_SLUG/pipelines" \
-#   -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-#   -d "$PIPELINE_CONFIG"
-# )
+[[ "$RESPONSE" == *errors||message* ]] && { echo $RESPONSE | jq; exit 1; }
 
-# # ### Check for pipeline create error ###
-# [[ "$RESPONSE" == *errors* ]] && { echo $RESPONSE | jq; exit 1; }
-
-# echo "done."
+echo "done."
 
 cd $CURRENT_DIR
 
