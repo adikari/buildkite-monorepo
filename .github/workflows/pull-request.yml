@@ -2,7 +2,9 @@ name: Trigger Buildkite Pipeline
 on:
   push:
     branches:
-      - "master"
+      - "*"
+      - "*/*"
+      - "!master"
 
 jobs:
   build:
