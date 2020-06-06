@@ -2,7 +2,7 @@ steps:
   - label: "Triggering pull request pipeline"
     plugins:
       chronotc/monorepo-diff#v1.1.1:
-        diff: ./diff.sh
+        diff: ".buildkite/diff"
         wait: false
         watch:
           - path: "foo-service"
