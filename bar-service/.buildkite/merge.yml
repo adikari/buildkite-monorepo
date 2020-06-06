@@ -1,0 +1,3 @@
+steps:
+  - label: "Bar service merge"
+    command: "bar-service/bin/deploy"

@@ -1,0 +1,3 @@
+steps:
+  - label: "Bar service pull request"
+    command: "bar-service/bin/build"
