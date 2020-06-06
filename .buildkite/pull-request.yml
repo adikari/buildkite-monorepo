@@ -4,6 +4,8 @@ steps:
       chronotc/monorepo-diff#v1.1.1:
         diff: ".buildkite/diff"
         wait: false
+        env:
+          DEBUG: true
         watch:
           - path: "foo-service"
             config:
