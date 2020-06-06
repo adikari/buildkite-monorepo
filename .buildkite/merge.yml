@@ -4,8 +4,6 @@ steps:
       chronotc/monorepo-diff#v1.1.1:
         diff: "git diff --name-only HEAD~1"
         wait: false
-        env:
-          DEBUG: true
         watch:
           - path: "foo-service"
             config:
