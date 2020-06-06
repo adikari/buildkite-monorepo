@@ -1,5 +1,7 @@
-BuildkiteAgentToken="$BUILDKITE_AGENT_TOKEN"
-InstanceType="t2.micro"
-SecretsBucket="bulidkite-secrets-adikari"
+BuildkiteAgentToken=$BUILDKITE_AGENT_TOKEN
+SecretsBucket=bulidkite-secrets-adikari
+InstanceType=t2.micro
 MinSize=0
-MaxSize=2
+MaxSize=3
+ScaleUpAdjustment=1
+ScaleDownAdjustment=-1
