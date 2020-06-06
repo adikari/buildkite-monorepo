@@ -2,7 +2,7 @@ steps:
   - label: "Triggering merge pipeline"
     plugins:
       chronotc/monorepo-diff#v1.1.1:
-        diff: "git --no-pager diff --name-only HEAD~1"
+        diff: "git diff --name-only HEAD~1"
         wait: false
         watch:
           - path: "foo-service"

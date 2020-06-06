@@ -2,7 +2,7 @@ steps:
   - label: "Triggering pull request pipeline"
     plugins:
       chronotc/monorepo-diff#v1.1.1:
-        diff: "git --no-pager diff --name-only HEAD..$(git merge-base HEAD master)"
+        diff: ./diff.sh
         wait: false
         watch:
           - path: "foo-service"
