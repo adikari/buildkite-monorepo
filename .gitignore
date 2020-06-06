@@ -35,3 +35,4 @@ Temporary Items
 .envrc
 id_rsa*
 *.pub
+aws-stack.yml
