@@ -1,5 +1,8 @@
 #!/bin/bash
 
-COMMIT_POINT=$(git merge-base HEAD master)
+COMMIT=$1
 
-git --no-pager diff --name-only HEAD..$COMMIT_POINT
+BRANCH_POINT_COMMIT=$(git merge-base master $COMMIT)
+
+echo "Running diff between: $COMMIT - $BRANCH_POINT_COMMIT"
+git --no-pager diff --name-only $COMMIT..$BRANCH_POINT_COMMIT
