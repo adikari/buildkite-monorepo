@@ -1,0 +1,5 @@
+BuildkiteAgentToken="$BUILDKITE_AGENT_TOKEN"
+InstanceType="t2.micro"
+SecretsBucket="bulidkite-secrets"
+MinSize=0
+MaxSize=2
