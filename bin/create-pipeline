@@ -1,103 +1,75 @@
 #!/bin/bash
 
-set -u
+set -euo pipefail
 
-### Validate number of arguments ###
-USAGE="ERROR: Invalid arguments. \nUsage: create-pipeline <pipeline-type> <service-name>";
-[ $# -lt 2 ] && (echo -e $USAGE; exit 1;)
+export SERVICE="."
+export PIPELINE_TYPE=""
+export REPOSITORY=git@github.com:adikari/buildkite-docker-example.git
 
-### Define variables ###
 CURRENT_DIR=$(pwd)
 ROOT_DIR="$( dirname "${BASH_SOURCE[0]}" )"/..
-TYPE=$1
-SERVICE=$2
+STATUS_CHECK=false
+BUILDKITE_ORG_SLUG=adikari # update to your buildkite org slug
+
+USAGE="USAGE: $(basename "$0") [-s|--service] service_name [-t|--type] pipeline_type
+
+Eg: create-pipeline --type pull-request
+    create-pipeline --type merge --service foo-service
+    create-pipeline --type merge --status-checks
+
+NOTE: BUILDKITE_TOKEN must be set in environment
+
+ARGUMENTS:
+    -t | --type           buildkite pipeline type <merge|pull-request|deploy> (required)
+    -s | --service        service name (optional, default: deploy root pipeline)
+    -r | --repository     github repository url (optional, default: buildkite-docker-example)
+    -c | --status-checks      enable github status checks (optional, default: true)
+    -h | --help           show this help text"
+
+[ -z $BUILDKITE_TOKEN ] && { echo "BUILDKITE_TOKEN is not set."; exit 1;}
+
+while [ $# -gt 0 ]; do
+    if [[ $1 =~ "--"* ]]; then
+        case $1 in
+            --help|-h) echo "$USAGE"; exit; ;;
+            --service|-s) SERVICE=$2;;
+            --type|-t) PIPELINE_TYPE=$2;;
+            --repository|-r) REPOSITORY=$2;;
+            --status-check|-c) STATUS_CHECK=${2:-true};;
+        esac
+    fi
+    shift
+done
+
+[ -z "$PIPELINE_TYPE" ] && { echo "$USAGE"; exit 1; }
+
+export PIPELINE_NAME=$([ $SERVICE == "." ] && echo "" || echo "$SERVICE-")$PIPELINE_TYPE
+
+BUILDKITE_CONFIG_FILE=.buildkite/pipelines/$PIPELINE_TYPE.json
+[ ! -f "$BUILDKITE_CONFIG_FILE" ] && { echo "Invalid pipeline type: File not found $BUILDKITE_CONFIG_FILE"; exit; }
+
+BUILDKITE_CONFIG=$(cat $BUILDKITE_CONFIG_FILE | envsubst)
+
+if [ $STATUS_CHECK == "false" ]; then
+  pipeline_settings='{ "provider_settings": { "trigger_mode": "none" } }'
+  BUILDKITE_CONFIG=$((echo $BUILDKITE_CONFIG; echo $pipeline_settings) | jq -s add)
+fi
 
 cd $ROOT_DIR
 
-### Validate script arguments ###
-[ -z "$TYPE" ] && { echo "pipeline type is missing in argument!"; exit; }
-[ -z "$SERVICE" ] && { echo "service is missing in argument!"; exit; }
-
-### Define buildkite pipeline payload ###
-COMMON_CONFIG='{
-  "name": "'$SERVICE'-'$TYPE'",
-  "repository": "git@github.com:adikari/buildkite-docker-example.git",
-  "steps": [
-    {
-      "type": "script",
-      "name": ":buildkite: '$TYPE'",
-      "command": "buildkite-agent pipeline upload '$SERVICE'/.buildkite/'$TYPE'.yml"
-    }
-  ],
-  "cancel_running_branch_builds": true,
-  "skip_queued_branch_builds": true
-}'
-
-PULL_REQUEST_CONFIG='{
-  "default_branch": "",
-  "description": "Pipeline for '$SERVICE' pull requests",
-  "branch_configuration": "!master",
-  "provider_settings": {
-    "trigger_mode": "code",
-    "publish_commit_status_per_step": true,
-    "publish_blocked_as_pending": true,
-    "pull_request_branch_filter_enabled": true,
-    "pull_request_branch_filter_configuration": "!master",
-    "separate_pull_request_statuses": true
-  }
-}'
-
-DEPLOY_CONFIG='{
-  "default_branch": "master",
-  "branch_configuration": "master",
-  "description": "Pipeline for '$SERVICE' deployment",
-  "provider_settings": {
-    "trigger_mode": "code",
-    "build_pull_requests": false,
-    "publish_blocked_as_pending": true,
-    "publish_commit_status_per_step": true
-  }
-}'
-
-MERGE_CONFIG='{
-  "default_branch": "master",
-  "branch_configuration": "master",
-  "description": "Pipeline for '$SERVICE' merge",
-  "provider_settings": {
-    "trigger_mode": "code",
-    "build_pull_requests": false,
-    "publish_blocked_as_pending": true,
-    "publish_commit_status_per_step": true
-  }
-}'
-
-### Check which pipeline to create ###
-CURRENT_PIPELINE_CONFIG=''
-case $TYPE in
-  pull-request)
-    CURRENT_PIPELINE_CONFIG=$PULL_REQUEST_CONFIG;;
-  merge)
-    CURRENT_PIPELINE_CONFIG=$MERGE_CONFIG;;
-  deploy)
-    CURRENT_PIPELINE_CONFIG=$DEPLOY_CONFIG;;
-  *)
-    echo "Invalid pipeline type. Allowed values <pull-request|merge|deploy>"; exit 1;;
-esac
-
-echo "Creating pipeline $TYPE.."
-
-### Combine common payload and current pipeline payload ###
-PIPELINE_CONFIG=$((echo $COMMON_CONFIG; echo $CURRENT_PIPELINE_CONFIG) | jq -s add)
-
-### Create pipeline ###
-RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$ORG_SLUG/pipelines" \
+echo "Creating $PIPELINE_TYPE pipeline.."
+RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$BUILDKITE_ORG_SLUG/pipelines" \
   -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  -d "$PIPELINE_CONFIG"
+  -d "$BUILDKITE_CONFIG"
 )
 
-# ### Check for pipeline create error ###
-[[ "$RESPONSE" == *errors* ]] && { echo $RESPONSE | jq; exit 1; }
+[[ "$RESPONSE" == *errors||message* ]] && { echo $RESPONSE | jq; exit 1; }
 
 echo "done."
 
 cd $CURRENT_DIR
+
+unset REPOSITORY
+unset PIPELINE_TYPE
+unset SERVICE
+unset PIPELINE_NAME

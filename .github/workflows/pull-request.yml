@@ -1,19 +1,19 @@
-name: Trigger Buildkite Merge
+name: Trigger Buildkite Pipeline
 on:
   push:
-    paths:
-      - "bar-service/**"
     branches:
-      - "master"
+      - "*"
+      - "*/*"
+      - "!master"
 
 jobs:
   build:
-    name: Bar Service Merge
+    name: Pull Request
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger pipeline
+      - name: Trigger pull request pipeline
         uses: buildkite/trigger-pipeline-action@v1.2.0
         env:
-          PIPELINE: adikari/bar-service-merge
+          PIPELINE: adikari/pull-request
           MESSAGE: ":github: ${{github.event.head_commit.message}}"
           BUILDKITE_API_ACCESS_TOKEN: ${{ secrets.BUILDKITE_API_ACCESS_TOKEN }}
