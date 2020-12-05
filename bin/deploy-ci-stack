@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-[ -z $BUILDKITE_AGENT_TOKEN ] && { echo "BUILDKITE_AGENT_TOKEN is not set."; exit 1;}
+[ -z $BUILDKITE_API_TOKEN ] && { echo "BUILDKITE_API_TOKEN is not set."; exit 1;}
 
 CURRENT_DIR=$(pwd)
 ROOT_DIR="$( dirname "${BASH_SOURCE[0]}" )"/..

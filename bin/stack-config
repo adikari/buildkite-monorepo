@@ -1,4 +1,4 @@
-BuildkiteAgentToken=$BUILDKITE_AGENT_TOKEN
+BuildkiteAgentToken=$BUILDKITE_API_TOKEN
 SecretsBucket=buildkite-secrets-adikari
 InstanceType=t2.micro
 MinSize=0

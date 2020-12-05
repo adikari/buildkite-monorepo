@@ -17,7 +17,7 @@ Eg: create-pipeline --type pull-request
     create-pipeline --type merge --service foo-service
     create-pipeline --type merge --status-checks
 
-NOTE: BUILDKITE_TOKEN must be set in environment
+NOTE: BUILDKITE_API_TOKEN must be set in environment
 
 ARGUMENTS:
     -t | --type           buildkite pipeline type <merge|pull-request|deploy> (required)
@@ -26,7 +26,7 @@ ARGUMENTS:
     -c | --status-checks      enable github status checks (optional, default: true)
     -h | --help           show this help text"
 
-[ -z $BUILDKITE_TOKEN ] && { echo "BUILDKITE_TOKEN is not set."; exit 1;}
+[ -z $BUILDKITE_API_TOKEN ] && { echo "BUILDKITE_API_TOKEN is not set."; exit 1;}
 
 while [ $# -gt 0 ]; do
     if [[ $1 =~ "--"* ]]; then
@@ -59,7 +59,7 @@ cd $ROOT_DIR
 
 echo "Creating $PIPELINE_TYPE pipeline.."
 RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$BUILDKITE_ORG_SLUG/pipelines" \
-  -H "Authorization: Bearer $BUILDKITE_TOKEN" \
+  -H "Authorization: Bearer $BUILDKITE_API_TOKEN" \
   -d "$BUILDKITE_CONFIG"
 )
 
