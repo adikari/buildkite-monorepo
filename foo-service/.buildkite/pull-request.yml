@@ -1,3 +1,5 @@
 steps:
-  - label: "foo service pull request"
-    command: "foo-service/bin/build"
+  - label: "Bar service pull request"
+    command:
+      - "echo linting"
+      - "echo testing"

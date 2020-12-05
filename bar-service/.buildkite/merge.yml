@@ -1,3 +1,14 @@
 steps:
-  - label: "Bar service merge"
-    command: "bar-service/bin/deploy"
+  - label: "Deploy Bar service to staging"
+    command:
+      - "echo linting"
+      - "echo testing"
+      - "echo deploying-to-staging"
+
+  - wait
+
+  - block: ":rocket: Release to Production"
+
+  - label: "Deploy Bar service to production"
+    command:
+      - "echo deploying-to-production"

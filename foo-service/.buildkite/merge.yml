@@ -1,3 +1,14 @@
 steps:
-  - label: "Foo service merge"
-    command: "foo-service/bin/deploy"
+  - label: "Deploy Foo service to staging"
+    command:
+      - "echo linting"
+      - "echo testing"
+      - "echo deploying-to-staging"
+
+  - wait
+
+  - block: ":rocket: Release to Production"
+
+  - label: "Deploy Foo service to production"
+    command:
+      - "echo deploying-to-production"
