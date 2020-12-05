@@ -1,5 +1,5 @@
 steps:
-  - label: "Bar service pull request"
+  - label: "Foo service pull request"
     command:
       - "echo linting"
       - "echo testing"
