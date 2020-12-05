@@ -63,9 +63,14 @@ RESPONSE=$(curl -s POST "https://api.buildkite.com/v2/organizations/$BUILDKITE_O
   -d "$BUILDKITE_CONFIG"
 )
 
-[[ "$RESPONSE" == *errors||message* ]] && { echo $RESPONSE | jq; exit 1; }
+[[ "$RESPONSE" == *errors* ]] && { echo $RESPONSE | jq; exit 1; }
 
-echo "done."
+WEB_URL=$(echo $RESPONSE | jq -r '.web_url')
+WEBHOOK_URL=$(echo $RESPONSE | jq -r '.provider.webhook_url')
+
+echo "Pipeline url: $WEB_URL"
+echo "Webhook url: $WEBHOOK_URL"
+echo "$PIPELINE_NAME pipeline created."
 
 cd $CURRENT_DIR
 
