@@ -1,11 +1,6 @@
 steps:
   - label: "Deploying foo service to ${STAGE}"
-<<<<<<< Updated upstream
-    build: "./bin/deploy ${STAGE}"
-    type: "script"
-=======
     command:
       - "pwd"
       - "ls"
       - "../bin/deploy ${STAGE}"
->>>>>>> Stashed changes
