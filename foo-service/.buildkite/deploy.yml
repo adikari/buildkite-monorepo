@@ -1,6 +1,3 @@
 steps:
   - label: "Deploying foo service to ${STAGE}"
-    command:
-      - "pwd"
-      - "ls"
-      - "../bin/deploy ${STAGE}"
+    command: "./foo-service/bin/deploy ${STAGE}"
