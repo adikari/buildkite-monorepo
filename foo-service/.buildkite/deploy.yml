@@ -1,3 +1,4 @@
 steps:
   - label: "Deploying foo service to ${STAGE}"
     build: "./bin/deploy ${STAGE}"
+    type: "script"
