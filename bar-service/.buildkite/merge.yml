@@ -1,14 +1,22 @@
 steps:
-  - label: "Deploy Bar service to staging"
+  - label: "Run sanity checks"
     command:
       - "echo linting"
       - "echo testing"
-      - "echo deploying-to-staging"
+
+  - label: "Deploy to staging"
+    trigger: "bar-service-deploy"
+    build:
+      env:
+        STAGE: "staging"
 
   - wait
 
   - block: ":rocket: Release to Production"
 
-  - label: "Deploy Bar service to production"
-    command:
-      - "echo deploying-to-production"
+  - label: "Deploy to production"
+    trigger: "bar-service-deploy"
+    build:
+      env:
+        STAGE: "production"
+
